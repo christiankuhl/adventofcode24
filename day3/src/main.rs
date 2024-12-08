@@ -20,7 +20,7 @@ fn part2(input: &str) -> usize {
     let dont = Regex::new(r"don't\(\)").expect("Could not compile regex");
     let mul = Regex::new(r"mul\(([0-9]{1,3}),([0-9]{1,3})\)").expect("Unable to compile regex");
     let mut sum: usize = 0;
-    let mut cursor: usize = 0;
+    let mut cursor: usize;
     let mut active: bool = true;
     loop {
         if active {

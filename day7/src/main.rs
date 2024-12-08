@@ -11,13 +11,13 @@ enum Op {
 fn load(path: &str) -> Vec<(usize, Vec<usize>)> {
     fs::read_to_string(path)
         .expect("File not found")
-        .split("\n")
+        .split('\n')
         .map(|r| {
             let (tgt, values) = r.split_once(": ").expect("Unexpected row format");
             (
                 tgt.parse().expect("Expected usize"),
                 values
-                    .split(" ")
+                    .split(' ')
                     .map(|s| s.parse().expect("Expected usize"))
                     .collect(),
             )

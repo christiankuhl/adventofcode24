@@ -10,8 +10,8 @@ fn parse(path: &str) -> (Vec<(isize, isize)>, Vec<Vec<isize>>) {
     let content = fs::read_to_string(path).expect("File not found");
     let (order_raw, updates_raw) = content.split_once("\n\n").expect("Expected two parts");
     let pairs: Vec<(isize, isize)> = order_raw
-        .split("\n")
-        .map(|s| s.split_once("|").expect("Expected a pair separated by |"))
+        .split('\n')
+        .map(|s| s.split_once('|').expect("Expected a pair separated by |"))
         .map(|(l, r)| {
             (
                 l.parse().expect("Expected integer"),
@@ -20,9 +20,9 @@ fn parse(path: &str) -> (Vec<(isize, isize)>, Vec<Vec<isize>>) {
         })
         .collect();
     let updates: Vec<Vec<isize>> = updates_raw
-        .split("\n")
+        .split('\n')
         .map(|s| {
-            s.split(",")
+            s.split(',')
                 .map(|v| v.parse().expect("Expected an integer"))
                 .collect()
         })
@@ -43,21 +43,21 @@ fn make_order(pairs: &[(isize, isize)]) -> HashSet<(isize, isize)> {
         items.insert(*l);
         items.insert(*r);
         order.insert((*l, *r));
-        less_than.entry(*l).or_insert(HashSet::new()).insert(*r);
-        greater_than.entry(*r).or_insert(HashSet::new()).insert(*l);
+        less_than.entry(*l).or_default().insert(*r);
+        greater_than.entry(*r).or_default().insert(*l);
     }
     let mut prev_len = 0;
     let mut new_pairs = HashSet::new();
     while order.len() > prev_len {
         prev_len = order.len();
         for (l, r) in order.iter() {
-            for x in less_than.entry(*r).or_insert(HashSet::new()).iter() {
+            for x in less_than.entry(*r).or_default().iter() {
                 new_pairs.insert((*r, *x));
-                greater_than.entry(*x).or_insert(HashSet::new()).insert(*r);
+                greater_than.entry(*x).or_default().insert(*r);
             }
-            for x in greater_than.entry(*l).or_insert(HashSet::new()).iter() {
+            for x in greater_than.entry(*l).or_default().iter() {
                 new_pairs.insert((*x, *l));
-                less_than.entry(*x).or_insert(HashSet::new()).insert(*l);
+                less_than.entry(*x).or_default().insert(*l);
             }
         }
         for pair in new_pairs.drain() {
@@ -69,18 +69,18 @@ fn make_order(pairs: &[(isize, isize)]) -> HashSet<(isize, isize)> {
 
 fn compare_pages(a: isize, b: isize, order: &HashSet<(isize, isize)>) -> Ordering {
     if a == b {
-        return Ordering::Equal;
+        Ordering::Equal
     } else if order.contains(&(a, b)) {
-        return Ordering::Less;
+        Ordering::Less
     } else {
-        return Ordering::Greater;
+        Ordering::Greater
     }
 }
 
 fn part1(updates: &[Vec<isize>], order: &HashSet<(isize, isize)>) -> isize {
     updates
         .iter()
-        .filter(|u| is_ordered(u, &order))
+        .filter(|u| is_ordered(u, order))
         .map(|u| u[u.len() / 2])
         .sum()
 }
@@ -88,12 +88,12 @@ fn part1(updates: &[Vec<isize>], order: &HashSet<(isize, isize)>) -> isize {
 fn part2(updates: &mut [Vec<isize>], order: &HashSet<(isize, isize)>) -> isize {
     let mut filtered: Vec<Vec<isize>> = updates
         .iter()
-        .filter(|u| !is_ordered(u, &order))
+        .filter(|u| !is_ordered(u, order))
         .cloned()
         .collect();
     filtered
         .iter_mut()
-        .for_each(|u| u.sort_by(|&a, &b| compare_pages(a, b, &order)));
+        .for_each(|u| u.sort_by(|&a, &b| compare_pages(a, b, order)));
     filtered.iter().map(|u| u[u.len() / 2]).sum()
 }
 

@@ -3,7 +3,7 @@ use std::{collections::HashMap, fs};
 fn load(path: &str) -> HashMap<(isize, isize), char> {
     let mut res = HashMap::new();
     let raw = fs::read_to_string(path).expect("File not found");
-    for (y, row) in raw.split("\n").enumerate() {
+    for (y, row) in raw.split('\n').enumerate() {
         for (x, c) in row.chars().enumerate() {
             res.insert((x as isize, y as isize), c);
         }
@@ -56,7 +56,7 @@ fn count_xmas(grid: &HashMap<(isize, isize), char>) -> usize {
     for x in 0..dim.0 + 1 {
         for y in 0..dim.1 + 1 {
             for dir in 0..8 {
-                if is_xmas(&grid, x, y, dir) {
+                if is_xmas(grid, x, y, dir) {
                     xmas += 1;
                 }
             }
@@ -70,7 +70,7 @@ fn count_x_mas(grid: &HashMap<(isize, isize), char>) -> usize {
     let dim = grid.keys().max().unwrap();
     for x in 0..dim.0 + 1 {
         for y in 0..dim.1 + 1 {
-            if is_x_mas(&grid, x, y) {
+            if is_x_mas(grid, x, y) {
                 xmas += 1;
             }
         }

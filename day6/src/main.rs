@@ -91,9 +91,8 @@ fn part1(lab: &LabArea) -> usize {
 
 fn part2(lab: &LabArea) -> usize {
     let mut res = 0;
-    let mut lab = lab.clone();
+    let lab = lab.clone();
     let mut new_lab = lab.clone();
-    let guard_pos = lab.guard;
     new_lab.move_guard();
     for (x, y) in new_lab.guard_positions() {
         if lab.blocks.contains(&(x, y)) || lab.guard == (x, y - 1) {
@@ -112,7 +111,7 @@ fn part2(lab: &LabArea) -> usize {
 fn load(path: &str) -> LabArea {
     let mut result = LabArea::default();
     let raw = fs::read_to_string(path).expect("File not found");
-    for (y, row) in raw.split("\n").enumerate() {
+    for (y, row) in raw.split('\n').enumerate() {
         result.width = row.len() as isize;
         result.height += 1;
         for (x, c) in row.chars().enumerate() {

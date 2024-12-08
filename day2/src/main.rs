@@ -3,13 +3,13 @@ use std::fs;
 fn is_safe(levels: &[i32]) -> bool {
     let mut next_lvl = levels.iter();
     let next = next_lvl.next();
-    assert!(next != None);
+    assert!(next.is_some());
     let mut sign: Option<i32> = None;
     for (prev, next) in levels.iter().zip(next_lvl) {
         if (next - prev).abs() < 1 || (next - prev).abs() > 3 {
             return false;
         }
-        if sign == None {
+        if sign.is_none() {
             sign = Some((next - prev).signum());
         } else {
             let direction = sign.unwrap();
@@ -46,9 +46,9 @@ fn part2(levels: &[Vec<i32>]) -> usize {
 fn load(path: &str) -> Vec<Vec<i32>> {
     fs::read_to_string(path)
         .unwrap()
-        .split("\n")
+        .split('\n')
         .map(|l| {
-            l.split(" ")
+            l.split(' ')
                 .map(|s| s.parse().expect("Expected i32..."))
                 .collect()
         })

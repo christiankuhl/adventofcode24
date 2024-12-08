@@ -18,7 +18,7 @@ impl Grid {
         x >= 0 && x < self.width && y >= 0 && y < self.height
     }
     fn find_antinodes_pt1(&mut self) {
-        for (_, antennae) in &self.antennae {
+        for antennae in self.antennae.values() {
             for pair in antennae.iter().combinations(2) {
                 let (x1, y1) = pair[0];
                 let (x2, y2) = pair[1];
@@ -37,13 +37,13 @@ impl Grid {
     }
 
     fn find_antinodes_pt2(&mut self) {
-        for (_, antennae) in &self.antennae {
+        for antennae in self.antennae.values() {
             for pair in antennae.iter().combinations(2) {
                 let (x1, y1) = *pair[0];
                 let (x2, y2) = *pair[1];
                 let mut dx = x2 - x1;
                 let mut dy = y2 - y1;
-                let m = gcd(dx.abs() as usize, dy.abs() as usize) as isize;
+                let m = gcd(dx.unsigned_abs(), dy.unsigned_abs()) as isize;
                 dx /= m;
                 dy /= m;
                 let mut px = x1;
@@ -86,7 +86,7 @@ fn load(path: &str) -> Grid {
     let antinodes_pt2 = HashSet::new();
     fs::read_to_string(path)
         .expect("File not found")
-        .split("\n")
+        .split('\n')
         .enumerate()
         .for_each(|(y, r)| {
             height += 1;
