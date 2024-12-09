@@ -68,6 +68,12 @@ mod test {
     #[test]
     fn part1_test() {
         let data = load("test.txt");
+        assert_eq!(part1(&data), 161);
+    }
+
+    #[test]
+    fn part2_test() {
+        let data = load("test.txt");
         assert_eq!(part2(&data), 48);
     }
 }

@@ -1,17 +1,21 @@
-use std::fs;
 use std::collections::HashMap;
+use std::fs;
 
 fn parse_input() -> (Vec<u32>, Vec<u32>) {
     let mut left = vec![];
     let mut right = vec![];
-    fs::read_to_string("part1.txt").unwrap().split('\n').for_each(
-        |s| {
-            let pair: Vec<u32> = s.split("   ").map(|t| t.parse().expect("Expected an unsigned integer")).collect();
+    fs::read_to_string("input.txt")
+        .unwrap()
+        .split('\n')
+        .for_each(|s| {
+            let pair: Vec<u32> = s
+                .split("   ")
+                .map(|t| t.parse().expect("Expected an unsigned integer"))
+                .collect();
             assert!(pair.len() == 2);
             left.push(pair[0]);
             right.push(pair[1]);
-        }
-    );
+        });
     (left, right)
 }
 
@@ -20,7 +24,9 @@ fn part1(left: &[u32], right: &[u32]) -> u32 {
     left.sort();
     let mut right = right.to_owned();
     right.sort();
-    left.iter().zip(right).fold(0, |a, (&l, r)| a + (l as i32 - r as i32).unsigned_abs())
+    left.iter()
+        .zip(right)
+        .fold(0, |a, (&l, r)| a + (l as i32 - r as i32).unsigned_abs())
 }
 
 fn part2(left: &[u32], right: &[u32]) -> u32 {
@@ -28,11 +34,29 @@ fn part2(left: &[u32], right: &[u32]) -> u32 {
     for r in right {
         tally.entry(*r).and_modify(|e| *e += 1).or_insert(1);
     }
-    left.iter().fold(0, |a, &l| a + tally.get(&l).unwrap_or(&0) * l)
+    left.iter()
+        .fold(0, |a, &l| a + tally.get(&l).unwrap_or(&0) * l)
 }
 
 fn main() {
     let (left, right) = parse_input();
     println!("Part 1: {}", part1(&left, &right));
     println!("Part 2: {}", part2(&left, &right));
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_part1() {
+        let (left, right) = parse_input();
+        assert_eq!(part1(&left, &right), 2031679);
+    }
+
+    #[test]
+    fn test_part2() {
+        let (left, right) = parse_input();
+        assert_eq!(part2(&left, &right), 19678534);
+    }
 }
