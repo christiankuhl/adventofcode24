@@ -42,6 +42,7 @@ struct LabArea {
     width: isize,
     height: isize,
     guard: (isize, isize),
+    start: (isize, isize),
     guard_direction: Direction,
     guard_states: HashSet<((isize, isize), Direction)>,
     blocks: HashSet<(isize, isize)>,
@@ -81,6 +82,11 @@ impl LabArea {
         }
         guard_positions
     }
+    fn reset(&mut self) {
+        self.guard_states.clear();
+        self.guard = self.start;
+        self.guard_direction = Direction::North;
+    }
 }
 
 fn part1(lab: &LabArea) -> usize {
@@ -89,21 +95,21 @@ fn part1(lab: &LabArea) -> usize {
     lab.guard_positions().len()
 }
 
-fn part2(lab: &LabArea) -> usize {
+fn part2(lab: &mut LabArea) -> usize {
     let mut res = 0;
-    let lab = lab.clone();
-    let mut new_lab = lab.clone();
-    new_lab.move_guard();
-    for (x, y) in new_lab.guard_positions() {
+    lab.move_guard();
+    let positions = lab.guard_positions().clone();
+    for (x, y) in positions {
+        lab.reset();
         if lab.blocks.contains(&(x, y)) || lab.guard == (x, y - 1) {
             continue;
         }
-        let mut new_lab = lab.clone();
-        new_lab.blocks.insert((x, y));
-        match new_lab.move_guard() {
+        lab.blocks.insert((x, y));
+        match lab.move_guard() {
             GuardTrajectory::Loop => res += 1,
             GuardTrajectory::LeavesArea => {}
         }
+        lab.blocks.remove(&(x, y));
     }
     res
 }
@@ -121,6 +127,7 @@ fn load(path: &str) -> LabArea {
                 }
                 '^' => {
                     result.guard = (x as isize, y as isize);
+                    result.start = (x as isize, y as isize);
                     result
                         .guard_states
                         .insert(((x as isize, y as isize), Direction::North));
@@ -134,9 +141,9 @@ fn load(path: &str) -> LabArea {
 }
 
 fn main() {
-    let lab = load("input.txt");
+    let mut lab = load("input.txt");
     println!("Part 1: {}", part1(&lab));
-    println!("Part 2: {}", part2(&lab));
+    println!("Part 2: {}", part2(&mut lab));
 }
 
 #[cfg(test)]
@@ -151,7 +158,7 @@ mod test {
 
     #[test]
     fn test_part2() {
-        let lab = load("test.txt");
-        assert_eq!(part2(&lab), 6)
+        let mut lab = load("test.txt");
+        assert_eq!(part2(&mut lab), 6)
     }
 }
