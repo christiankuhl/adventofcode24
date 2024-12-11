@@ -10,18 +10,20 @@ N = 100
 
 def benchmark(dir_):
     total = 0.
-    print(f"Benchmarking {dir_}...")
+    print(f"Benchmarking {dir_}... ")
     subprocess.run("cargo build --release", shell=True, capture_output=True)
-    for _ in range(N):
+    for k in range(N):
+        print(f"Run {k} / {N}...", end="\r")
         start = time.time()
         subprocess.run("cargo run --release", shell=True, capture_output=True)
         elapsed = time.time() - start
         total += elapsed
+    print(f"{'Done.':<80}")
     return total / N
 
 def for_each_day(do_something):
     res = {}
-    for dir_ in os.listdir("."):
+    for dir_ in sorted(os.listdir(".")):
         if not os.path.isdir(dir_) or dir_[:3] != "day":
             continue
         os.chdir(dir_)
@@ -31,9 +33,11 @@ def for_each_day(do_something):
     return res
 
 def test_solutions(dir_):
-    print(f"Testing {dir_}...")
+    print(f"Testing {dir_}... ", end="")
     output = str(subprocess.run("cargo test", shell=True, capture_output=True).stdout)
-    return int(PASSED_TESTS.findall(output)[0])
+    stars = int(PASSED_TESTS.findall(output)[0])
+    print(f"{STAR * stars}")
+    return stars
 
 def build_readme(benches, test_results):
     with open("README - template.md") as f:
