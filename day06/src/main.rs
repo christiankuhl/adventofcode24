@@ -45,7 +45,9 @@ struct LabArea {
     start: (isize, isize),
     guard_direction: Direction,
     guard_states: HashSet<((isize, isize), Direction)>,
-    blocks: HashSet<(isize, isize)>,
+    guard_trajectory: Vec<((isize, isize), Direction)>,
+    grid: Vec<Vec<char>>,
+    dont_track_guard: bool,
 }
 
 impl LabArea {
@@ -65,24 +67,28 @@ impl LabArea {
             {
                 return GuardTrajectory::LeavesArea;
             }
-            if self.blocks.contains(&next_pos) {
+            if self.grid[next_pos.1 as usize][next_pos.0 as usize] == '#' {
+                if !self.guard_states.insert((next_pos, self.guard_direction)) {
+                    return GuardTrajectory::Loop;
+                } 
                 self.guard_direction.rotate();
                 continue;
             }
             self.guard = next_pos;
-            if !self.guard_states.insert((next_pos, self.guard_direction)) {
-                return GuardTrajectory::Loop;
+            if !self.dont_track_guard {
+                self.guard_trajectory.push((next_pos, self.guard_direction));
             }
         }
     }
     fn guard_positions(&self) -> HashSet<(isize, isize)> {
         let mut guard_positions = HashSet::new();
-        for (pos, _) in &self.guard_states {
+        for (pos, _) in &self.guard_trajectory {
             guard_positions.insert(*pos);
         }
         guard_positions
     }
     fn reset(&mut self) {
+        self.guard_trajectory.clear();
         self.guard_states.clear();
         self.guard = self.start;
         self.guard_direction = Direction::North;
@@ -91,6 +97,7 @@ impl LabArea {
 
 fn part1(lab: &LabArea) -> usize {
     let mut lab = lab.clone();
+    lab.dont_track_guard = false;
     lab.move_guard();
     lab.guard_positions().len()
 }
@@ -98,20 +105,18 @@ fn part1(lab: &LabArea) -> usize {
 fn part2(lab: &mut LabArea) -> usize {
     let mut res = 0;
     lab.move_guard();
-    let positions = lab.guard_positions().clone();
-    for (x, y) in positions {
+    lab.dont_track_guard = true;
+    let positions_and_directions = lab.guard_trajectory.clone();
+    for ((x, y), _) in positions_and_directions.iter().skip(2) {
         lab.reset();
-        if lab.blocks.contains(&(x, y)) || lab.guard == (x, y - 1) {
-            continue;
-        }
-        lab.blocks.insert((x, y));
+        lab.grid[*y as usize][*x as usize] = '#';
         match lab.move_guard() {
             GuardTrajectory::Loop => res += 1,
             GuardTrajectory::LeavesArea => {}
         }
-        lab.blocks.remove(&(x, y));
+        lab.grid[*y as usize][*x as usize] = '.';
     }
-    res
+    res - 1
 }
 
 fn load(path: &str) -> LabArea {
@@ -120,10 +125,11 @@ fn load(path: &str) -> LabArea {
     for (y, row) in raw.split('\n').enumerate() {
         result.width = row.len() as isize;
         result.height += 1;
+        result.grid.push(vec![]);
         for (x, c) in row.chars().enumerate() {
             match c {
                 '#' => {
-                    result.blocks.insert((x as isize, y as isize));
+                    // result.grid(x as isize, y as isize);
                 }
                 '^' => {
                     result.guard = (x as isize, y as isize);
@@ -135,6 +141,7 @@ fn load(path: &str) -> LabArea {
                 '.' => {}
                 _ => unreachable!(),
             }
+            result.grid[y].push(c);
         }
     }
     result
